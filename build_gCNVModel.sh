@@ -298,7 +298,7 @@ main() {
     log "=========================================="
     log "Pipeline completed successfully!"
     log "Model version: ${MODEL_VERSION}"
-    log "Model location: ${MODEL_DIR}"
+    #log "Model location: ${MODEL_DIR}"
     log "=========================================="
 }
 
