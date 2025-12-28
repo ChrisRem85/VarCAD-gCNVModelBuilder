@@ -41,7 +41,7 @@ fi
 
 # Run somalier relate
 echo "Running somalier relate on ${#SOMALIER_FILES[@]} samples..."
-somalier relate \
+/mnt/storage/groups/heinz/tools/somalier-latest relate \
     --infer \
     -o "${OUTPUT_DIR}/somalier_relate" \
     "${SOMALIER_FILES[@]}"
