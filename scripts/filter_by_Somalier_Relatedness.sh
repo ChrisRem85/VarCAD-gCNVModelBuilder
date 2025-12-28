@@ -12,17 +12,25 @@ OUTPUT_DIR="$3"
 RELATEDNESS_THRESHOLD=0.1  # Threshold for considering samples related
 
 mkdir -p "${OUTPUT_DIR}"
+mkdir -p "${OUTPUT_DIR}/somalier/extracted"
+
 # Extract sample IDs
 tail -n +2 "${INPUT_SAMPLES}" | cut -f1 > "${OUTPUT_DIR}/sample_ids.txt"
 
-# Collect somalier files for these samples
+# Collect and copy somalier files for these samples
 SOMALIER_FILES=()
 while read -r sample_id run coverage sex; do
+    # Read the full line to get run information
+    line=$(grep "^${sample_id}" "${INPUT_SAMPLES}" | head -n1)
+    run=$(echo "${line}" | cut -f2)
+    
     somalier_file="${BASE_PATH}/${run}/somalier/extracted/${sample_id}.hg38.somalier"
     if [ -f "${somalier_file}" ]; then
-        SOMALIER_FILES+=("${somalier_file}")
+        # Copy to output directory
+        cp -l "${somalier_file}" "${OUTPUT_DIR}/somalier/extracted/" 2>/dev/null || cp "${somalier_file}" "${OUTPUT_DIR}/somalier/extracted/"
+        SOMALIER_FILES+=("${OUTPUT_DIR}/somalier/extracted/${sample_id}.hg38.somalier")
     else
-        echo "WARNING: Somalier file not found for ${sample_id}" >&2
+        echo "WARNING: Somalier file not found for ${sample_id}: ${somalier_file}" >&2
     fi
 done < "${OUTPUT_DIR}/sample_ids.txt"
 
