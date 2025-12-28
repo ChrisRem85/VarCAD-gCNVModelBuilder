@@ -34,6 +34,10 @@ LOG_FILE="${BASE_DIR}/build_log_${MODEL_VERSION}.log"
 
 # Function to log messages
 log() {
+    # Ensure log directory exists before writing
+    if [ ! -d "$(dirname "${LOG_FILE}")" ]; then
+        mkdir -p "$(dirname "${LOG_FILE}")"
+    fi
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" | tee -a "${LOG_FILE}"
 }
 
