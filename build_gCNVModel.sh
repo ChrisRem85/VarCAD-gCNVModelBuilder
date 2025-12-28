@@ -311,7 +311,7 @@ filter_related_samples() {
     log "STEP 2b: Filtering related samples using somalier..."
     
     bash "${SCRIPT_DIR}/scripts/filter_by_Somalier_Relatedness.sh" \
-        "${KARYOTYPE_DIR}/samples_normal_karyotype.txt" \
+        "${BASE_DIR}/filtered_by_karyotype/samples_normal_karyotype.txt" \
         "${BASE_PATH}" \
         "${BASE_DIR}/filtered_by_relatedness"
     
