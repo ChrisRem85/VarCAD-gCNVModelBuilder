@@ -235,7 +235,7 @@ filter_by_karyotype() {
             continue
         fi
         
-        total_samples=$((total_samples + 1))
+        karyotyped_samples=$((karyotyped_samples + 1))
         
         # Find the corresponding SAMPLE_* directory by matching sample ID in contig_ploidy.tsv
         local ploidy_file=""
@@ -288,7 +288,7 @@ filter_by_karyotype() {
         
     done < "${input_file}"
     
-    log "Step 2 completed. ${normal_karyotype}/${total_samples} samples with normal karyotype (${abnormal_karyotype} abnormal)"
+    log "Step 2 completed. ${normal_karyotype}/${karyotyped_samples} samples with normal karyotype (${abnormal_karyotype} abnormal)"
     log "Output saved to ${output_file}"
 }
 
