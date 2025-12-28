@@ -18,7 +18,7 @@ tail -n +2 "${INPUT_SAMPLES}" | cut -f1 > "${OUTPUT_DIR}/sample_ids.txt"
 # Collect somalier files for these samples
 SOMALIER_FILES=()
 while read -r sample_id run coverage sex; do
-    somalier_file="${BASE_PATH}/${run}/somalier/${sample_id}.somalier"
+    somalier_file="${BASE_PATH}/${run}/somalier/extracted/${sample_id}.hg38.somalier"
     if [ -f "${somalier_file}" ]; then
         SOMALIER_FILES+=("${somalier_file}")
     else
