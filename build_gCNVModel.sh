@@ -86,19 +86,44 @@ copy_read_count_files() {
 
 gatk_filter_intervals() {
     log "Filtering intervals for gCNV model..."
-    # Example filtering command (customize as needed)
-    threads=128
-    memory=256
+    
+    local threads=128
+    local memory=256
+    local read_counts_dir="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts"
+    local output_dir="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/04_filtered_intervals"
+    
+    mkdir -p "${output_dir}"
+    
+    # Build input arguments for all TSV files
+    local input_args=""
+    for tsv_file in "${read_counts_dir}"/*.hg38.tsv; do
+        if [ -f "${tsv_file}" ]; then
+            input_args="${input_args} -I ${tsv_file}"
+        fi
+    done
+    
+    if [ -z "${input_args}" ]; then
+        log "ERROR: No TSV files found in ${read_counts_dir}"
+        exit 1
+    fi
+    
+    log "Found $(echo ${input_args} | grep -o ' -I ' | wc -l) read count files"
+    
     srun -p all -c ${threads} --mem=${memory}GB \
-    docker run --cpus ${threads} -m ${memory}g -u $UID:1002 --rm -v ${BASE_DIR}:${BASE_DIR} -v ${SCRIPT_DIR}:${SCRIPT_DIR}:ro broadinstitute/gatk:${GATK_VERSION} /bin/bash -c " \
-        gatk FilterIntervals \
-            --java-options '-Xmx${memory}G' \
-            --intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.preprocessed.interval_list \
-            --annotated-intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.annotated_interval_list \
-            ${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts/*.hg38.tsv \
-            --interval-merging-rule OVERLAPPING_ONLY \
-            -O ${BASE_DIR}/hg38.filtered.interval_list;"
-    log "Intervals filtered and saved to ${BASE_DIR}/preprocessed.interval_list"
+    docker run --cpus ${threads} -m ${memory}g -u $UID:1002 --rm \
+        -v ${BASE_DIR}:${BASE_DIR} \
+        -v ${SCRIPT_DIR}:${SCRIPT_DIR}:ro \
+        broadinstitute/gatk:${GATK_VERSION} /bin/bash -c " \
+            umask 0027; \
+            gatk FilterIntervals \
+                --java-options '-Xmx${memory}G' \
+                --intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.preprocessed.interval_list \
+                --annotated-intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.annotated.interval_list \
+                ${input_args} \
+                --interval-merging-rule OVERLAPPING_ONLY \
+                -O ${output_dir}/cohort.hg38.filtered.interval_list;" \
+    
+    log "Intervals filtered and saved to ${output_dir}/cohort.hg38.filtered.interval_list"
 }
 
 # # Step 1: Filter intervals and determine contig ploidy
