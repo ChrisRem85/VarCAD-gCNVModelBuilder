@@ -7,3 +7,7 @@
 # Temporary files
 *.tmp
 .DS_Store
+
+# Large generated interval files
+assets/*/hg38.annotated.interval_list
+assets/*/hg38.preprocessed.interval_list
