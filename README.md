@@ -72,7 +72,7 @@ YYYYMMDD/
 Detailed documentation for each component:
 
 - **[Main Pipeline](docs/build_gCNVModel.md)** - Complete pipeline orchestration and configuration
-- **[Coverage Filtering](docs/filter_GRZ_MeanDepthOfCoverage.md)** - GRZ QC parsing and coverage filtering
+- **[Coverage Filtering](docs/filter_by_GRZ_MeanDepthOfCoverage.md)** - GRZ QC parsing and coverage filtering
 - **[Karyotype Filtering](docs/filter_karyotype.md)** - Normal karyotype validation
 - **[Relatedness Filtering](docs/filter_related.md)** - Somalier-based relationship removal
 - **[Sample Selection](docs/select_samples.md)** - Random balanced cohort selection  

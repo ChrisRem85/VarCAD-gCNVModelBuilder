@@ -53,22 +53,22 @@ YYYYMMDD/
 
 ## Pipeline Flow
 
-### 1. Initialization
+### 0. Initialization
 ```bash
 check_dependencies()  # Validates GATK and Somalier are available
 create_directories()  # Creates output directory structure
 ```
 
-### 2. Coverage Filtering
+### 1. Coverage Filtering
 ```bash
 filter_by_read_depth()
 ```
-- Calls `filter_GRZ_MeanDepthOfCoverage.sh` to parse GRZ QC files
+- Calls `filter_by_GRZ_MeanDepthOfCoverage.sh` to parse GRZ QC files
 - Filters samples by coverage range (25-60X)
 - Hard links read count TSV files from run directories
 - Output: `samples_filtered_by_coverage.txt`
 
-### 3. Interval Preprocessing
+### 2. Interval Preprocessing
 ```bash
 prepare_intervals_and_ploidy()
 ```

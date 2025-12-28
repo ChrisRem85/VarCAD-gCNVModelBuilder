@@ -74,8 +74,8 @@ create_directories() {
 
 # Step 1: Get GRZ Mean Depth of Coverage
 filter_by_GRZ_MeanDepthOfCoverage() {
-    log "STEP 1: Getting GRZ Mean Depth of Coverage..."
-    bash "${SCRIPT_DIR}/scripts/filter_GRZ_MeanDepthOfCoverage.sh" \
+    log "STEP 1: Filtering by GRZ Mean Depth of Coverage..."
+    bash "${SCRIPT_DIR}/scripts/filter_by_GRZ_MeanDepthOfCoverage.sh" \
         "${BASE_PATH}" \
         "${MIN_COVERAGE}" \
         "${MAX_COVERAGE}" \
@@ -88,7 +88,7 @@ filter_by_read_depth() {
     log "STEP 1: Filtering samples by read depth (${MIN_COVERAGE}X - ${MAX_COVERAGE}X)..."
     
     # Run the QC script
-    bash "${SCRIPT_DIR}/scripts/filter_GRZ_MeanDepthOfCoverage.sh" \
+    bash "${SCRIPT_DIR}/scripts/filter_by_GRZ_MeanDepthOfCoverage.sh" \
         "${BASE_PATH}" \
         "${MIN_COVERAGE}" \
         "${MAX_COVERAGE}" \
