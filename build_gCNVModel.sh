@@ -280,7 +280,7 @@ main() {
     
     #gatk_filter_intervals
     
-    #gatk_determine_contig_ploidy
+    gatk_determine_contig_ploidy
 
     #filter_by_read_depth
     #prepare_intervals_and_ploidy
