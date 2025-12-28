@@ -316,6 +316,7 @@ filter_by_Somalier_Relatedness() {
         "${BASE_DIR}/filtered_by_relatedness"
     
     log "Step 2b completed. $(wc -l < ${BASE_DIR}/filtered_by_relatedness/samples_unrelated.txt) unrelated samples remain"
+    log "Output saved to ${BASE_DIR}/filtered_by_relatedness/samples_unrelated.txt"
 }
 
 # Step 3: Randomly select final samples
