@@ -109,21 +109,90 @@ gatk_filter_intervals() {
     
     log "Found $(echo ${input_args} | grep -o ' -I ' | wc -l) read count files"
     
+    # Clean and create output directory
+    mkdir -p "${output_dir}"
+    rm -rf "${output_dir}"
+    mkdir -p "${output_dir}"
+    
     srun -p all -c ${threads} --mem=${memory}GB \
     docker run --cpus ${threads} -m ${memory}g -u $UID:1002 --rm \
         -v ${BASE_DIR}:${BASE_DIR} \
         -v ${SCRIPT_DIR}:${SCRIPT_DIR}:ro \
         broadinstitute/gatk:${GATK_VERSION} /bin/bash -c " \
-            umask 0027; \
+            printf 'Container ID:\t'; hostname; \
+            printf 'Start time:\t'; date; \umask 0027; \
             gatk FilterIntervals \
                 --java-options '-Xmx${memory}G' \
                 --intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.preprocessed.interval_list \
                 --annotated-intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.annotated.interval_list \
                 ${input_args} \
                 --interval-merging-rule OVERLAPPING_ONLY \
-                -O ${output_dir}/cohort.hg38.filtered.interval_list;" \
+                -O ${output_dir}/cohort.hg38.filtered.interval_list; \
+            printf 'End time:\t'; date;" \
+    2>&1 | tee -a "${output_dir}/cohort.hg38.filtered.interval_list.log"
     
     log "Intervals filtered and saved to ${output_dir}/cohort.hg38.filtered.interval_list"
+}
+
+
+gatk_determine_contig_ploidy() {
+    log "Determining germline contig ploidy for gCNV model..."
+    
+    local threads=128
+    local memory=512
+    local read_counts_dir="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts"
+    local filtered_intervals="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/04_filtered_intervals/cohort.hg38.filtered.interval_list"
+    local output_parent="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/05_contig_ploidy"
+    local ploidy_model_dir="${output_parent}/cohort.hg38.ploidy-model"
+    local ploidy_calls_dir="${output_parent}/cohort.hg38.ploidy-calls"
+    local priors="${SCRIPT_DIR}/assets/contig_ploidy_priors.tsv"
+    
+    # Build input arguments for all TSV files
+    local input_args=""
+    for tsv_file in "${read_counts_dir}"/*.hg38.tsv; do
+        if [ -f "${tsv_file}" ]; then
+            input_args="${input_args} -I ${tsv_file}"
+        fi
+    done
+    
+    if [ -z "${input_args}" ]; then
+        log "ERROR: No TSV files found in ${read_counts_dir}"
+        exit 1
+    fi
+    
+    log "Found $(echo ${input_args} | grep -o ' -I ' | wc -l) read count files"
+    
+    # Clean and create output directories
+    mkdir -p "${ploidy_model_dir}"
+    mkdir -p "${ploidy_calls_dir}"
+    rm -rf "${ploidy_model_dir}"
+    rm -rf "${ploidy_calls_dir}"
+    mkdir -p "${ploidy_model_dir}"
+    mkdir -p "${ploidy_calls_dir}"
+    
+    srun -p all -c ${threads} --mem=${memory}GB \
+    docker run --cpus ${threads} -m ${memory}g -u root:1002 --rm \
+        -v ${BASE_DIR}:${BASE_DIR} \
+        -v ${db_dir}:${db_dir}:ro \
+        broadinstitute/gatk:${GATK_VERSION} /bin/bash -c " \
+            printf 'Container ID:\t'; hostname; \
+            printf 'Start time:\t'; date; \
+            umask 0027; \
+            gatk DetermineGermlineContigPloidy \
+                --java-options '-Xmx${memory}G' \
+                --intervals ${filtered_intervals} \
+                --interval-merging-rule OVERLAPPING_ONLY \
+                ${input_args} \
+                --contig-ploidy-priors ${priors} \
+                --output ${output_parent} \
+                --output-prefix cohort.hg38.ploidy \
+                --verbosity DEBUG; \
+            chown -R \$UID:1002 ${ploidy_model_dir}; \
+            chown -R \$UID:1002 ${ploidy_calls_dir}; \
+            printf 'End time:\t'; date; " \
+        2>&1 | tee -a "${output_parent}/cohort.hg38.ploidy.log"
+    
+    log "Contig ploidy determined. Model: ${ploidy_model_dir}, Calls: ${ploidy_calls_dir}"
 }
 
 # # Step 1: Filter intervals and determine contig ploidy
@@ -203,12 +272,15 @@ main() {
     #check_dependencies
     
     # Step 1
-    filter_by_GRZ_MeanDepthOfCoverage
     
-    copy_read_count_files
+    #filter_by_GRZ_MeanDepthOfCoverage
     
-    gatk_filter_intervals
+    #copy_read_count_files
     
+    #gatk_filter_intervals
+    
+    #gatk_determine_contig_ploidy
+
     #filter_by_read_depth
     #prepare_intervals_and_ploidy
     
