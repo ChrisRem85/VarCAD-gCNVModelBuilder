@@ -259,6 +259,17 @@ filter_by_karyotype() {
             continue
         fi
         
+        # Check all autosomes (chr1-22) have ploidy=2
+        local autosome_check=true
+        for chr_num in {1..22}; do
+            local chr_ploidy=$(grep -w "^chr${chr_num}" "${ploidy_file}" | awk '{print $2}')
+            if [ "${chr_ploidy}" != "2" ]; then
+                log "WARNING: Abnormal autosomal ploidy for ${sample_id}: chr${chr_num}=${chr_ploidy}"
+                autosome_check=false
+                break
+            fi
+        done
+        
         # Extract chrX and chrY ploidy values
         local chrX_ploidy=$(grep -w "^chrX" "${ploidy_file}" | awk '{print $2}')
         local chrY_ploidy=$(grep -w "^chrY" "${ploidy_file}" | awk '{print $2}')
@@ -267,7 +278,10 @@ filter_by_karyotype() {
         local sex=""
         local is_normal=false
         
-        if [ "${chrX_ploidy}" = "2" ] && [ "${chrY_ploidy}" = "0" ]; then
+        if [ "${autosome_check}" = false ]; then
+            # Abnormal autosomal ploidy
+            abnormal_karyotype=$((abnormal_karyotype + 1))
+        elif [ "${chrX_ploidy}" = "2" ] && [ "${chrY_ploidy}" = "0" ]; then
             # 46,XX - Female
             sex="female"
             is_normal=true
@@ -276,8 +290,8 @@ filter_by_karyotype() {
             sex="male"
             is_normal=true
         else
-            # Abnormal karyotype
-            log "WARNING: Abnormal karyotype for ${sample_id}: chrX=${chrX_ploidy}, chrY=${chrY_ploidy}"
+            # Abnormal sex chromosome karyotype
+            log "WARNING: Abnormal sex chromosome karyotype for ${sample_id}: chrX=${chrX_ploidy}, chrY=${chrY_ploidy}"
             abnormal_karyotype=$((abnormal_karyotype + 1))
         fi
         
