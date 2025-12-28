@@ -214,11 +214,82 @@ gatk_determine_contig_ploidy() {
 filter_by_karyotype() {
     log "STEP 2: Filtering samples by normal karyotype..."
     
-    bash "${SCRIPT_DIR}/scripts/filter_karyotype.sh" \
-        "${BASE_DIR}/samples_filtered_by_coverage.txt" \
-        "${KARYOTYPE_DIR}/samples_normal_karyotype.txt"
+    local ploidy_calls_dir="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/05_contig_ploidy/cohort.hg38.ploidy-calls"
+    local input_file="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/filtered_by_GRZ_MeanDepthOfCoverage.txt"
+    local output_dir="${BASE_DIR}/filtered_by_karyotype"
+    local output_file="${output_dir}/samples_normal_karyotype.txt"
     
-    log "Step 2a completed. $(wc -l < ${KARYOTYPE_DIR}/samples_normal_karyotype.txt) samples with normal karyotype"
+    mkdir -p "${output_dir}"
+    
+    # Create header
+    echo -e "sample_id\trun\tcoverage\tsex" > "${output_file}"
+    
+    local karyotyped_samples=0
+    local normal_karyotype=0
+    local abnormal_karyotype=0
+    
+    # Read the filtered samples and check karyotype from ploidy calls
+    while IFS=$'\t' read -r sample_id run coverage; do
+        # Skip header
+        if [ "${sample_id}" = "sample_id" ]; then
+            continue
+        fi
+        
+        total_samples=$((total_samples + 1))
+        
+        # Find the corresponding SAMPLE_* directory by matching sample ID in contig_ploidy.tsv
+        local ploidy_file=""
+        for sample_dir in "${ploidy_calls_dir}"/SAMPLE_*/; do
+            if [ -d "${sample_dir}" ]; then
+                local tsv_file="${sample_dir}contig_ploidy.tsv"
+                if [ -f "${tsv_file}" ]; then
+                    # Extract sample ID from @RG line
+                    local file_sample_id=$(grep "^@RG" "${tsv_file}" | sed -n 's/.*SM:\([^\t]*\).*/\1/p')
+                    if [ "${file_sample_id}" = "${sample_id}" ]; then
+                        ploidy_file="${tsv_file}"
+                        break
+                    fi
+                fi
+            fi
+        done
+        
+        if [ -z "${ploidy_file}" ] || [ ! -f "${ploidy_file}" ]; then
+            log "WARNING: No ploidy file found for sample ${sample_id}"
+            abnormal_karyotype=$((abnormal_karyotype + 1))
+            continue
+        fi
+        
+        # Extract chrX and chrY ploidy values
+        local chrX_ploidy=$(grep -w "^chrX" "${ploidy_file}" | awk '{print $2}')
+        local chrY_ploidy=$(grep -w "^chrY" "${ploidy_file}" | awk '{print $2}')
+        
+        # Determine if normal karyotype
+        local sex=""
+        local is_normal=false
+        
+        if [ "${chrX_ploidy}" = "2" ] && [ "${chrY_ploidy}" = "0" ]; then
+            # 46,XX - Female
+            sex="female"
+            is_normal=true
+        elif [ "${chrX_ploidy}" = "1" ] && [ "${chrY_ploidy}" = "1" ]; then
+            # 46,XY - Male
+            sex="male"
+            is_normal=true
+        else
+            # Abnormal karyotype
+            log "WARNING: Abnormal karyotype for ${sample_id}: chrX=${chrX_ploidy}, chrY=${chrY_ploidy}"
+            abnormal_karyotype=$((abnormal_karyotype + 1))
+        fi
+        
+        if [ "${is_normal}" = true ]; then
+            echo -e "${sample_id}\t${run}\t${coverage}\t${sex}" >> "${output_file}"
+            normal_karyotype=$((normal_karyotype + 1))
+        fi
+        
+    done < "${input_file}"
+    
+    log "Step 2 completed. ${normal_karyotype}/${total_samples} samples with normal karyotype (${abnormal_karyotype} abnormal)"
+    log "Output saved to ${output_file}"
 }
 
 # Step 2: Filter by relatedness using somalier
@@ -277,13 +348,12 @@ main() {
     
     #gatk_filter_intervals
     
-    gatk_determine_contig_ploidy
+    #gatk_determine_contig_ploidy
 
-    #filter_by_read_depth
-    #prepare_intervals_and_ploidy
-    
+      
     # Step 2
-    #filter_by_karyotype
+    filter_by_karyotype
+    
     #filter_related_samples
     
     # Step 3
