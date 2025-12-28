@@ -19,7 +19,7 @@ N_FEMALES=100
 BASE_PATH="/mnt/storage/genetic_data/WGS"  # Base path for WGS data
 INTERVALS_FILE="${SCRIPT_DIR}/assets/hg38.preprocessed.interval_list"
 REFERENCE_FASTA="/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
-GATK_PATH="gatk"  # Update if needed
+GATK_VERSION="4.6.0.0"  # GATK version
 
 # Log file
 LOG_FILE="${BASE_DIR}/build_log_${MODEL_VERSION}.log"
