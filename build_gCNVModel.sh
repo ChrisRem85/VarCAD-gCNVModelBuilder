@@ -142,10 +142,11 @@ gatk_determine_contig_ploidy() {
     local memory=512
     local read_counts_dir="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts"
     local filtered_intervals="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/04_filtered_intervals/cohort.hg38.filtered.interval_list"
+    local priors="${SCRIPT_DIR}/assets/contig_ploidy_priors.tsv"
     local output_parent="${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/05_contig_ploidy"
     local ploidy_model_dir="${output_parent}/cohort.hg38.ploidy-model"
     local ploidy_calls_dir="${output_parent}/cohort.hg38.ploidy-calls"
-    local priors="${SCRIPT_DIR}/assets/contig_ploidy_priors.tsv"
+    
     
     # Build input arguments for all TSV files
     local input_args=""
