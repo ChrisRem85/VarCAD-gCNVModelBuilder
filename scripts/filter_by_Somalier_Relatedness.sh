@@ -54,7 +54,7 @@ awk -v threshold="${RELATEDNESS_THRESHOLD}" \
 
 # Remove minimum number of samples to eliminate all relationships
 # Strategy: iteratively remove the sample with most relationships
-python3 - <<'EOF' > "${OUTPUT_DIR}/samples_to_remove.txt"
+python3 - <<EOF > "${OUTPUT_DIR}/samples_to_remove.txt"
 import sys
 
 # Read related pairs

@@ -307,7 +307,7 @@ filter_by_karyotype() {
 }
 
 # Step 2: Filter by relatedness using somalier
-filter_related_samples() {
+filter_by_Somalier_Relatedness() {
     log "STEP 2b: Filtering related samples using somalier..."
     
     bash "${SCRIPT_DIR}/scripts/filter_by_Somalier_Relatedness.sh" \
@@ -368,7 +368,7 @@ main() {
     # Step 2
     #filter_by_karyotype
     
-    filter_related_samples
+    filter_by_Somalier_Relatedness
     
     # Step 3
     #select_final_samples
