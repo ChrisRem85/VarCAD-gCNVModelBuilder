@@ -12,14 +12,13 @@ OUTPUT_DIR="$3"
 RELATEDNESS_THRESHOLD=0.1  # Threshold for considering samples related
 
 mkdir -p "${OUTPUT_DIR}"
-
 # Extract sample IDs
 tail -n +2 "${INPUT_SAMPLES}" | cut -f1 > "${OUTPUT_DIR}/sample_ids.txt"
 
 # Collect somalier files for these samples
 SOMALIER_FILES=()
-while read -r sample_id; do
-    somalier_file="${BASE_PATH}/somalier/${sample_id}.somalier"
+while read -r sample_id run coverage sex; do
+    somalier_file="${BASE_PATH}/${run}/somalier/${sample_id}.somalier"
     if [ -f "${somalier_file}" ]; then
         SOMALIER_FILES+=("${somalier_file}")
     else

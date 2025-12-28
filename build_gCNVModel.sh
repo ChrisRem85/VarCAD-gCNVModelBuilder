@@ -313,9 +313,9 @@ filter_related_samples() {
     bash "${SCRIPT_DIR}/scripts/filter_by_Somalier_Relatedness.sh" \
         "${KARYOTYPE_DIR}/samples_normal_karyotype.txt" \
         "${BASE_PATH}" \
-        "${UNRELATED_DIR}"
+        "${BASE_DIR}/filtered_by_relatedness"
     
-    log "Step 2b completed. $(wc -l < ${UNRELATED_DIR}/samples_unrelated.txt) unrelated samples remain"
+    log "Step 2b completed. $(wc -l < ${BASE_DIR}/filtered_by_relatedness/samples_unrelated.txt) unrelated samples remain"
 }
 
 # Step 3: Randomly select final samples
