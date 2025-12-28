@@ -21,13 +21,6 @@ INTERVALS_FILE="${SCRIPT_DIR}/assets/hg38.preprocessed.interval_list"
 REFERENCE_FASTA="/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
 GATK_PATH="gatk"  # Update if needed
 
-# Output directories
-FILTERED_DIR="${BASE_DIR}/filtered_by_read_depth"
-GCNV_DIR="${FILTERED_DIR}/gCNV/03_read_counts"
-KARYOTYPE_DIR="${BASE_DIR}/filtered_by_karyotype"
-UNRELATED_DIR="${BASE_DIR}/filtered_unrelated"
-FINAL_SAMPLES_DIR="${BASE_DIR}/final_samples"
-MODEL_DIR="${BASE_DIR}/model"
 
 # Log file
 LOG_FILE="${BASE_DIR}/build_log_${MODEL_VERSION}.log"
@@ -83,6 +76,18 @@ filter_by_GRZ_MeanDepthOfCoverage() {
     log "Step 1 completed. Coverage data saved to ${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage.txt"
 }
 
+# Copy read count files for filtered samples
+copy_read_count_files() {
+    log "Copying read count files for filtered samples..."
+    bash "${SCRIPT_DIR}/scripts/copy_read_count_files.sh" \
+        "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage.txt" \
+        "${BASE_PATH}" \
+        "${PROTOCOL}" \
+        "${BASE_DIR}/gCNV/${PROTOCOL}/03_read_counts/"
+    log "Read count files copied to ${BASE_DIR}/gCNV/${PROTOCOL}/03_read_counts/"
+}
+
+
 # Step 1: Get QC data and filter by read depth
 filter_by_read_depth() {
     log "STEP 1: Filtering samples by read depth (${MIN_COVERAGE}X - ${MAX_COVERAGE}X)..."
@@ -103,10 +108,10 @@ filter_by_read_depth() {
         fi
         
         # Use run directory to locate read count file directly
-        tsv_file="${BASE_PATH}/${run}/gCNV/03_read_counts/wgs.1k/${sample_id}.hg38.tsv"
+        tsv_file="${BASE_PATH}/${run}/gCNV/03_read_counts/${PROTOCOL}/${sample_id}.hg38.tsv"
         
         if [ -f "${tsv_file}" ]; then
-            dst_file="${GCNV_DIR}/${protocol}/${sample_id}.hg38.tsv"
+            dst_file="${GCNV_DIR}/${PROTOCOL}/${sample_id}.hg38.tsv"
             ln "${tsv_file}" "${dst_file}" 2>/dev/null || cp "${tsv_file}" "${dst_file}"
         else
             log "WARNING: Read count file not found: ${tsv_file}"
@@ -191,10 +196,11 @@ main() {
     log "=========================================="
     
     #check_dependencies
-    create_directories
     
     # Step 1
     filter_by_GRZ_MeanDepthOfCoverage
+    
+    copy_read_count_files
     
     #filter_by_read_depth
     #prepare_intervals_and_ploidy
