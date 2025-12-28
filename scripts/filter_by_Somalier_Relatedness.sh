@@ -9,7 +9,7 @@ INPUT_SAMPLES="$1"
 BASE_PATH="$2"
 OUTPUT_DIR="$3"
 
-RELATEDNESS_THRESHOLD=0.25  # Threshold for considering samples related
+RELATEDNESS_THRESHOLD=0.1  # Threshold for considering samples related
 
 mkdir -p "${OUTPUT_DIR}"
 
@@ -94,14 +94,14 @@ for sample in removed:
 EOF
 
 # Create list of unrelated samples
-echo -e "sample_id\tprotocol\trun\tcoverage\tsex\tkaryotype_status" > "${OUTPUT_DIR}/samples_unrelated.txt"
-while IFS=$'\t' read -r sample_id protocol run coverage sex karyotype; do
+echo -e "sample_id\trun\tcoverage\tsex" > "${OUTPUT_DIR}/samples_unrelated.txt"
+while IFS=$'\t' read -r sample_id run coverage sex; do
     if [ "${sample_id}" = "sample_id" ]; then
         continue
     fi
     
     if ! grep -q "^${sample_id}$" "${OUTPUT_DIR}/samples_to_remove.txt" 2>/dev/null; then
-        echo -e "${sample_id}\t${protocol}\t${run}\t${coverage}\t${sex}\t${karyotype}" >> "${OUTPUT_DIR}/samples_unrelated.txt"
+        echo -e "${sample_id}\t${run}\t${coverage}\t${sex}" >> "${OUTPUT_DIR}/samples_unrelated.txt"
     fi
 done < "${INPUT_SAMPLES}"
 
