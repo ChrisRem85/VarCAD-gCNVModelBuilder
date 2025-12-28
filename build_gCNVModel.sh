@@ -108,19 +108,18 @@ gatk_filter_intervals() {
     fi
     
     log "Found $(echo ${input_args} | grep -o ' -I ' | wc -l) read count files"
-    
-    # Clean and create output directory
-    mkdir -p "${output_dir}"
-    rm -rf "${output_dir}"
-    mkdir -p "${output_dir}"
-    
+        
     srun -p all -c ${threads} --mem=${memory}GB \
     docker run --cpus ${threads} -m ${memory}g -u $UID:1002 --rm \
         -v ${BASE_DIR}:${BASE_DIR} \
         -v ${SCRIPT_DIR}:${SCRIPT_DIR}:ro \
         broadinstitute/gatk:${GATK_VERSION} /bin/bash -c " \
             printf 'Container ID:\t'; hostname; \
-            printf 'Start time:\t'; date; \umask 0027; \
+            printf 'Start time:\t'; date; \
+            umask 0027; \
+            mkdir -p "${output_dir}"; \
+            rm -rf "${output_dir}"; \
+            mkdir -p "${output_dir}"; \
             gatk FilterIntervals \
                 --java-options '-Xmx${memory}G' \
                 --intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.preprocessed.interval_list \
@@ -163,22 +162,20 @@ gatk_determine_contig_ploidy() {
     
     log "Found $(echo ${input_args} | grep -o ' -I ' | wc -l) read count files"
     
-    # Clean and create output directories
-    mkdir -p "${ploidy_model_dir}"
-    mkdir -p "${ploidy_calls_dir}"
-    rm -rf "${ploidy_model_dir}"
-    rm -rf "${ploidy_calls_dir}"
-    mkdir -p "${ploidy_model_dir}"
-    mkdir -p "${ploidy_calls_dir}"
-    
     srun -p all -c ${threads} --mem=${memory}GB \
     docker run --cpus ${threads} -m ${memory}g -u root:1002 --rm \
         -v ${BASE_DIR}:${BASE_DIR} \
-        -v ${db_dir}:${db_dir}:ro \
+        -v ${SCRIPT_DIR}:${SCRIPT_DIR}:ro \
         broadinstitute/gatk:${GATK_VERSION} /bin/bash -c " \
             printf 'Container ID:\t'; hostname; \
             printf 'Start time:\t'; date; \
             umask 0027; \
+            mkdir -p "${ploidy_model_dir}"; \
+            mkdir -p "${ploidy_calls_dir}"; \
+            rm -r "${ploidy_model_dir}"; \
+            rm -r "${ploidy_calls_dir}"; \
+            mkdir -p "${ploidy_model_dir}"; \
+            mkdir -p "${ploidy_calls_dir}"; \
             gatk DetermineGermlineContigPloidy \
                 --java-options '-Xmx${memory}G' \
                 --intervals ${filtered_intervals} \
