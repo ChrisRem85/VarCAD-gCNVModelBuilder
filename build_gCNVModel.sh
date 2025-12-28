@@ -21,7 +21,6 @@ INTERVALS_FILE="${SCRIPT_DIR}/assets/hg38.preprocessed.interval_list"
 REFERENCE_FASTA="/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
 GATK_PATH="gatk"  # Update if needed
 
-
 # Log file
 LOG_FILE="${BASE_DIR}/build_log_${MODEL_VERSION}.log"
 
@@ -53,90 +52,71 @@ check_dependencies() {
     log "All dependencies found"
 }
 
-# Create directory structure
-create_directories() {
-    log "Creating directory structure for version ${MODEL_VERSION}..."
-    mkdir -p "${BASE_DIR}"
-    #mkdir -p "${GCNV_DIR}"/{wgs.1k}
-    #mkdir -p "${KARYOTYPE_DIR}"
-    #mkdir -p "${UNRELATED_DIR}"
-    #mkdir -p "${FINAL_SAMPLES_DIR}"
-    #mkdir -p "${MODEL_DIR}"
-    log "Directory structure created"
-}
 
 # Step 1: Get GRZ Mean Depth of Coverage
 filter_by_GRZ_MeanDepthOfCoverage() {
     log "STEP 1: Filtering by GRZ Mean Depth of Coverage..."
+
+    mkdir -p "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage"
+    
     bash "${SCRIPT_DIR}/scripts/filter_by_GRZ_MeanDepthOfCoverage.sh" \
         "${BASE_PATH}" \
         "${MIN_COVERAGE}" \
         "${MAX_COVERAGE}" \
-        "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage.txt"
-    log "Step 1 completed. Coverage data saved to ${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage.txt"
+        "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/filtered_by_GRZ_MeanDepthOfCoverage.txt"
+    
+    log "Step 1 completed. Coverage data saved to ${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/filtered_by_GRZ_MeanDepthOfCoverage.txt"
 }
 
 # Copy read count files for filtered samples
 copy_read_count_files() {
     log "Copying read count files for filtered samples..."
+
+    mkdir -p "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts/"
+    
     bash "${SCRIPT_DIR}/scripts/copy_read_count_files.sh" \
-        "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage.txt" \
+        "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/filtered_by_GRZ_MeanDepthOfCoverage.txt" \
         "${BASE_PATH}" \
         "${PROTOCOL}" \
-        "${BASE_DIR}/gCNV/${PROTOCOL}/03_read_counts/"
-    log "Read count files copied to ${BASE_DIR}/gCNV/${PROTOCOL}/03_read_counts/"
+        "${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts/"
+    
+    log "Read count files copied to ${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts/"
 }
 
 
-# Step 1: Get QC data and filter by read depth
-filter_by_read_depth() {
-    log "STEP 1: Filtering samples by read depth (${MIN_COVERAGE}X - ${MAX_COVERAGE}X)..."
-    
-    # Run the QC script
-    bash "${SCRIPT_DIR}/scripts/filter_by_GRZ_MeanDepthOfCoverage.sh" \
-        "${BASE_PATH}" \
-        "${MIN_COVERAGE}" \
-        "${MAX_COVERAGE}" \
-        "${BASE_DIR}/samples_filtered_by_coverage.txt"
-    
-    # Hard link the read count files
-    log "Hard linking read count files..."
-    while IFS=$'\t' read -r sample_id protocol run coverage; do
-        # Skip header
-        if [ "${sample_id}" = "sample_id" ]; then
-            continue
-        fi
-        
-        # Use run directory to locate read count file directly
-        tsv_file="${BASE_PATH}/${run}/gCNV/03_read_counts/${PROTOCOL}/${sample_id}.hg38.tsv"
-        
-        if [ -f "${tsv_file}" ]; then
-            dst_file="${GCNV_DIR}/${PROTOCOL}/${sample_id}.hg38.tsv"
-            ln "${tsv_file}" "${dst_file}" 2>/dev/null || cp "${tsv_file}" "${dst_file}"
-        else
-            log "WARNING: Read count file not found: ${tsv_file}"
-        fi
-    done < "${BASE_DIR}/samples_filtered_by_coverage.txt"
-    
-    log "Step 1 completed. $(wc -l < ${BASE_DIR}/samples_filtered_by_coverage.txt) samples passed coverage filter"
+gatk_filter_intervals() {
+    log "Filtering intervals for gCNV model..."
+    # Example filtering command (customize as needed)
+    threads=128
+    memory=256
+    srun -p all -c ${threads} --mem=${memory}GB \
+    docker run --cpus ${threads} -m ${memory}g -u $UID:1002 --rm -v ${BASE_DIR}:${BASE_DIR} -v ${SCRIPT_DIR}:${SCRIPT_DIR}:ro broadinstitute/gatk:${GATK_VERSION} /bin/bash -c " \
+        gatk FilterIntervals \
+            --java-options '-Xmx${memory}G' \
+            --intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.preprocessed.interval_list \
+            --annotated-intervals ${SCRIPT_DIR}/assets/${PROTOCOL}/hg38.annotated_interval_list \
+            ${BASE_DIR}/filtered_by_GRZ_MeanDepthOfCoverage/${PROTOCOL}/03_read_counts/*.hg38.tsv \
+            --interval-merging-rule OVERLAPPING_ONLY \
+            -O ${BASE_DIR}/hg38.filtered.interval_list;"
+    log "Intervals filtered and saved to ${BASE_DIR}/preprocessed.interval_list"
 }
 
-# Step 1: Filter intervals and determine contig ploidy
-prepare_intervals_and_ploidy() {
-    log "Filtering intervals and determining contig ploidy..."
+# # Step 1: Filter intervals and determine contig ploidy
+# prepare_intervals_and_ploidy() {
+#     log "Filtering intervals and determining contig ploidy..."
     
-    # Filter intervals (example - customize as needed)
-    ${GATK_PATH} PreprocessIntervals \
-        -R "${REFERENCE_FASTA}" \
-        -L "${INTERVALS_FILE}" \
-        --bin-length 0 \
-        --interval-merging-rule OVERLAPPING_ONLY \
-        -O "${BASE_DIR}/preprocessed.interval_list" \
-        2>&1 | tee -a "${LOG_FILE}"
+#     # Filter intervals (example - customize as needed)
+#     ${GATK_PATH} PreprocessIntervals \
+#         -R "${REFERENCE_FASTA}" \
+#         -L "${INTERVALS_FILE}" \
+#         --bin-length 0 \
+#         --interval-merging-rule OVERLAPPING_ONLY \
+#         -O "${BASE_DIR}/preprocessed.interval_list" \
+#         2>&1 | tee -a "${LOG_FILE}"
     
-    # Determine contig ploidy - will be done with cohort
-    log "Intervals prepared. Contig ploidy will be determined in cohort analysis"
-}
+#     # Determine contig ploidy - will be done with cohort
+#     log "Intervals prepared. Contig ploidy will be determined in cohort analysis"
+# }
 
 # Step 2: Filter by karyotype
 filter_by_karyotype() {
@@ -201,6 +181,8 @@ main() {
     filter_by_GRZ_MeanDepthOfCoverage
     
     copy_read_count_files
+    
+    gatk_filter_intervals
     
     #filter_by_read_depth
     #prepare_intervals_and_ploidy
