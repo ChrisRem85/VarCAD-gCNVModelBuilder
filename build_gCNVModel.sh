@@ -73,7 +73,7 @@ create_directories() {
 }
 
 # Step 1: Get GRZ Mean Depth of Coverage
-filter_GRZ_MeanDepthOfCoverage() {
+filter_by_GRZ_MeanDepthOfCoverage() {
     log "STEP 1: Getting GRZ Mean Depth of Coverage..."
     bash "${SCRIPT_DIR}/scripts/filter_GRZ_MeanDepthOfCoverage.sh" \
         "${BASE_PATH}" \
