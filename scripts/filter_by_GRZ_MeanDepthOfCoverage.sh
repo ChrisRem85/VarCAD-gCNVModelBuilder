@@ -20,8 +20,8 @@ echo "Searching for GRZ QC files ${BASE_PATH}/{24,25}*/quality_control/GRZ/G*.hg
 files_found=0
 samples_passed=0
 
-# Search for GRZ QC files matching the pattern (all subdirectories)
-for qc_file in "${BASE_PATH}/{24,25}*/quality_control/GRZ/G*.hg38.final.txt"; do
+# Search for GRZ QC files matching the pattern
+for qc_file in ${BASE_PATH}/{24,25}*/quality_control/GRZ/G*.hg38.final.txt; do
     if [ -f "${qc_file}" ]; then
         files_found=$((files_found + 1))
         
