@@ -32,15 +32,26 @@ for qc_file in ${BASE_PATH}/{24,25}*/quality_control/GRZ/G*.hg38.final.txt; do
         filename=$(basename "${qc_file}")
         sample_id=$(echo "${filename}" | sed 's/\.hg38\.final\.txt$//')
         
-        # Parse GRZ QC file to extract MeanDepthOfCoverage
-        coverage=$(grep "MeanDepthOfCoverage" "${qc_file}" | awk '{print $NF}')
+        # Parse GRZ QC file to extract MeanDepthOfCoverage from tab-delimited format
+        # File format: header line starts with #, data on second line
+        # Dynamically identify column by reading header
+        coverage=$(awk -F'\t' '
+            NR==1 {
+                # Find column index for MeanDepthOfCoverage in header row
+                for (i=1; i<=NF; i++) {
+                    if ($i == "MeanDepthOfCoverage") {
+                        col = i
+                        break
+                    }
+                }
+            }
+            NR==2 {
+                # Extract value from the identified column
+                if (col > 0) print $col
+            }
+        ' "${qc_file}")
         
-        if [ -z "${coverage}" ]; then
-            # Fallback: try to extract from tab-delimited format
-            coverage=$(awk -F'\t' '/MeanDepthOfCoverage/ {for(i=1;i<=NF;i++) if($i=="MeanDepthOfCoverage") print $(i+1)}' "${qc_file}")
-        fi
-        
-        if [ -n "${coverage}" ]; then
+        if [ -n "${coverage}" ] && [[ "${coverage}" =~ ^[0-9]+\.?[0-9]*$ ]]; then
             # Check if coverage is within range using awk for float comparison
             if awk -v cov="${coverage}" -v min="${MIN_COVERAGE}" -v max="${MAX_COVERAGE}" \
                 'BEGIN {exit !(cov >= min && cov <= max)}'; then
