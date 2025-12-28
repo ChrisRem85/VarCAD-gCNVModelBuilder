@@ -1,0 +1,9 @@
+# Pipeline output directories (dated folders)
+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+.DS_Store
