@@ -12,7 +12,7 @@ MAX_COVERAGE="$3"
 OUTPUT_FILE="$4"
 
 # Create header
-echo -e "sample_id\tprotocol\trun\tcoverage" > "${OUTPUT_FILE}"
+echo -e "sample_id\trun\tcoverage" > "${OUTPUT_FILE}"
 
 echo "Searching for GRZ QC files ${BASE_PATH}/{24,25}*/quality_control/GRZ/G*.hg38.final.txt"
 
@@ -21,7 +21,7 @@ files_found=0
 samples_passed=0
 
 # Search for GRZ QC files matching the pattern (all subdirectories)
-for qc_file in "${BASE_PATH}"/{24,25}*/quality_control/GRZ/G*.hg38.final.txt; do
+for qc_file in "${BASE_PATH}/{24,25}*/quality_control/GRZ/G*.hg38.final.txt"; do
     if [ -f "${qc_file}" ]; then
         files_found=$((files_found + 1))
         
@@ -31,9 +31,6 @@ for qc_file in "${BASE_PATH}"/{24,25}*/quality_control/GRZ/G*.hg38.final.txt; do
         # Extract sample ID from filename (G*.hg38.final.txt)
         filename=$(basename "${qc_file}")
         sample_id=$(echo "${filename}" | sed 's/\.hg38\.final\.txt$//')
-        
-        # Protocol is WGS based on the directory structure
-        protocol="WGS"
         
         # Parse GRZ QC file to extract MeanDepthOfCoverage
         coverage=$(grep "MeanDepthOfCoverage" "${qc_file}" | awk '{print $NF}')
@@ -47,7 +44,7 @@ for qc_file in "${BASE_PATH}"/{24,25}*/quality_control/GRZ/G*.hg38.final.txt; do
             # Check if coverage is within range using awk for float comparison
             if awk -v cov="${coverage}" -v min="${MIN_COVERAGE}" -v max="${MAX_COVERAGE}" \
                 'BEGIN {exit !(cov >= min && cov <= max)}'; then
-                echo -e "${sample_id}\t${protocol}\t${run}\t${coverage}" >> "${OUTPUT_FILE}"
+                echo -e "${sample_id}\t${run}\t${coverage}" >> "${OUTPUT_FILE}"
                 samples_passed=$((samples_passed + 1))
             fi
         else
