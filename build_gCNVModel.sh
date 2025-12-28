@@ -254,7 +254,7 @@ filter_by_karyotype() {
         done
         
         if [ -z "${ploidy_file}" ] || [ ! -f "${ploidy_file}" ]; then
-            log "WARNING: No ploidy file found for sample ${sample_id}"
+            log "WARNING: No ploidy file found for sample ${sample_id} from ${run}"
             abnormal_karyotype=$((abnormal_karyotype + 1))
             continue
         fi
