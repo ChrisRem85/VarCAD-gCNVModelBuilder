@@ -6,21 +6,21 @@
 set -euo pipefail
 
 # Configuration
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODEL_VERSION=$(date +%Y%m%d)
-MODEL_VERSION="20251228"  # Override for specific version
-BASE_DIR="${SCRIPT_DIR}/${MODEL_VERSION}"
-PROTOCOL="wgs.1k"  # Protocol name (e.g., wgs.1k, wes)
-MIN_COVERAGE=25
-MAX_COVERAGE=60
-N_MALES=100
-N_FEMALES=100
+export SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export MODEL_VERSION=$(date +%Y%m%d)
+export MODEL_VERSION="20251228"  # Override for specific version
+export BASE_DIR="${SCRIPT_DIR}/${MODEL_VERSION}"
+export PROTOCOL="wgs.1k"  # Protocol name (e.g., wgs.1k, wes)
+export MIN_COVERAGE=25
+export MAX_COVERAGE=60
+export N_MALES=100
+export N_FEMALES=100
 
 # Paths
-BASE_PATH="/mnt/storage/genetic_data/WGS"  # Base path for WGS data
-INTERVALS_FILE="${SCRIPT_DIR}/assets/hg38.preprocessed.interval_list"
-REFERENCE_FASTA="/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
-GATK_VERSION="4.6.0.0"  # GATK version
+export BASE_PATH="/mnt/storage/genetic_data/WGS"  # Base path for WGS data
+export INTERVALS_FILE="${SCRIPT_DIR}/assets/hg38.preprocessed.interval_list"
+export REFERENCE_FASTA="/mnt/storage/db/references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
+export GATK_VERSION="4.6.0.0"  # GATK version
 
 # Log file
 LOG_FILE="${BASE_DIR}/build_log_${MODEL_VERSION}.log"
