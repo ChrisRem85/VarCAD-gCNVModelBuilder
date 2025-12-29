@@ -34,7 +34,7 @@ tail -n +2 "${INPUT_FILE}" | while IFS=$'\t' read -r -a fields; do
     sample_id="${fields[$((sample_col-1))]}"
     run="${fields[$((run_col-1))]}"
     
-    filtered_samples=$((filtered_samples + 1))
+    input_samples=$((input_samples + 1))
     
     # Use run directory to locate read count file directly
     tsv_file="${BASE_PATH}/${run}/gCNV/03_read_counts/${PROTOCOL}/${sample_id}.hg38.tsv"
