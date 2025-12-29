@@ -12,6 +12,7 @@ OUTPUT_DIR="$4"
 
 # Create output directory
 mkdir -p "${OUTPUT_DIR}"
+rm -f "${OUTPUT_DIR}"/*.hg38.tsv
 
 echo "Copying read count files for input samples..."
 
