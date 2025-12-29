@@ -8,6 +8,7 @@ set -euo pipefail
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODEL_VERSION=$(date +%Y%m%d)
+MODEL_VERSION="20251228"  # Override for specific version
 BASE_DIR="${SCRIPT_DIR}/${MODEL_VERSION}"
 PROTOCOL="wgs.1k"  # Protocol name (e.g., wgs.1k, wes)
 MIN_COVERAGE=25
@@ -324,12 +325,13 @@ select_final_samples() {
     log "STEP 3: Randomly selecting ${N_MALES} males and ${N_FEMALES} females..."
     
     bash "${SCRIPT_DIR}/scripts/select_samples.sh" \
-        "${UNRELATED_DIR}/samples_unrelated.txt" \
+        "${BASE_DIR}/filtered_by_relatedness/samples_unrelated.txt" \
         "${N_MALES}" \
         "${N_FEMALES}" \
-        "${FINAL_SAMPLES_DIR}/final_samples.txt"
+        "${BASE_DIR}/selected_samples"
     
-    log "Step 3 completed. Selected $(wc -l < ${FINAL_SAMPLES_DIR}/final_samples.txt) samples for model building"
+    log "Step 3 completed. Selected $(wc -l < ${BASE_DIR}/selected_samples/final_samples.txt) samples for model building"
+    log "Output saved to ${BASE_DIR}/selected_samples/final_samples.txt"
 }
 
 # Step 4: Build gCNV model
@@ -369,10 +371,10 @@ main() {
     # Step 2
     #filter_by_karyotype
     
-    filter_by_Somalier_Relatedness
+    #filter_by_Somalier_Relatedness
     
     # Step 3
-    #select_final_samples
+    select_final_samples
     
     # Step 4
     #build_gcnv_model

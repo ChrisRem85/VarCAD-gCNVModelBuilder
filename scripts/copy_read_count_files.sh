@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-FILTERED_FILE="$1"
+INPUT_FILE="$1"
 BASE_PATH="$2"
 PROTOCOL="$3"
 OUTPUT_DIR="$4"
@@ -13,16 +13,26 @@ OUTPUT_DIR="$4"
 # Create output directory
 mkdir -p "${OUTPUT_DIR}"
 
-echo "Copying read count files for filtered samples..."
+echo "Copying read count files for input samples..."
 
-filtered_samples=0
-copied_files=0
+# Read header and identify column positions
+header=$(head -n1 "${INPUT_FILE}")
+sample_col=$(echo "${header}" | awk -F'\t' '{for(i=1;i<=NF;i++) if($i=="sample_id") print i}')
+run_col=$(echo "${header}" | awk -F'\t' '{for(i=1;i<=NF;i++) if($i=="run") print i}')
 
-while IFS=$'\t' read -r sample_id run coverage; do
-    # Skip header
-    if [ "${sample_id}" = "sample_id" ]; then
-        continue
-    fi
+if [ -z "${sample_col}" ] || [ -z "${run_col}" ]; then
+    echo "ERROR: Could not find required columns (sample_id, run) in header"
+    exit 1
+fi
+
+echo "Using columns: sample_id=${sample_col}, run=${run_col}"
+
+input_samples=0
+copied_samples=0
+
+tail -n +2 "${INPUT_FILE}" | while IFS=$'\t' read -r -a fields; do
+    sample_id="${fields[$((sample_col-1))]}"
+    run="${fields[$((run_col-1))]}"
     
     filtered_samples=$((filtered_samples + 1))
     
@@ -32,11 +42,11 @@ while IFS=$'\t' read -r sample_id run coverage; do
     if [ -f "${tsv_file}" ]; then
         dst_file="${OUTPUT_DIR}/${sample_id}.hg38.tsv"
         if cp -l "${tsv_file}" "${dst_file}" 2>/dev/null || cp "${tsv_file}" "${dst_file}"; then
-            copied_files=$((copied_files + 1))
+            copied_samples=$((copied_samples + 1))
         fi
     else
         echo "WARNING: Read count file not found: ${tsv_file}" >&2
     fi
-done < "${FILTERED_FILE}"
+done
 
-echo "Read count files copied: ${copied_files}/${filtered_samples} samples"
+echo "Read count files copied: ${copied_samples}/${input_samples} samples"

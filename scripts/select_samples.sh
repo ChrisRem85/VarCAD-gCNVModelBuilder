@@ -8,18 +8,26 @@ set -euo pipefail
 INPUT_SAMPLES="$1"
 N_MALES="$2"
 N_FEMALES="$3"
-OUTPUT_FILE="$4"
+OUTPUT_DIR="$4"
 
-TEMP_DIR=$(mktemp -d)
-trap "rm -rf ${TEMP_DIR}" EXIT
 
-# Separate by sex (sex is in column 5 now with run added)
-tail -n +2 "${INPUT_SAMPLES}" | awk '$5=="male"' > "${TEMP_DIR}/males.txt"
-tail -n +2 "${INPUT_SAMPLES}" | awk '$5=="female"' > "${TEMP_DIR}/females.txt"
+# Read header and identify column positions
+header=$(head -n1 "${INPUT_SAMPLES}")
+sex_col=$(echo "${header}" | awk -F'\t' '{for(i=1;i<=NF;i++) if($i=="sex") print i}')
 
-n_males_available=$(wc -l < "${TEMP_DIR}/males.txt")
-n_females_available=$(wc -l < "${TEMP_DIR}/females.txt")
+if [ -z "${sex_col}" ]; then
+    echo "ERROR: Could not find 'sex' column in header"
+    exit 1
+fi
 
+echo "Using column ${sex_col} for sex"
+
+# Separate by sex using the identified column
+tail -n +2 "${INPUT_SAMPLES}" | awk -F'\t' -v col="${sex_col}" '$col=="male"' > "${OUTPUT_DIR}/males.txt"
+tail -n +2 "${INPUT_SAMPLES}" | awk -F'\t' -v col="${sex_col}" '$col=="female"' > "${OUTPUT_DIR}/females.txt"
+
+n_males_available=$(wc -l < "${OUTPUT_DIR}/males.txt")
+n_females_available=$(wc -l < "${OUTPUT_DIR}/females.txt")
 echo "Available: ${n_males_available} males, ${n_females_available} females"
 
 # Check if we have enough samples
@@ -34,12 +42,26 @@ if [ "${n_females_available}" -lt "${N_FEMALES}" ]; then
 fi
 
 # Randomly select samples
-shuf "${TEMP_DIR}/males.txt" | head -n "${N_MALES}" > "${TEMP_DIR}/selected_males.txt"
-shuf "${TEMP_DIR}/females.txt" | head -n "${N_FEMALES}" > "${TEMP_DIR}/selected_females.txt"
+shuf "${OUTPUT_DIR}/males.txt" | head -n "${N_MALES}" > "${OUTPUT_DIR}/selected_males.txt"
+shuf "${OUTPUT_DIR}/females.txt" | head -n "${N_FEMALES}" > "${OUTPUT_DIR}/selected_females.txt"
 
-# Combine and create output
-echo -e "sample_id\tprotocol\trun\tcoverage\tsex\tkaryotype_status" > "${OUTPUT_FILE}"
-cat "${TEMP_DIR}/selected_males.txt" "${TEMP_DIR}/selected_females.txt" >> "${OUTPUT_FILE}"
+# Combine and create output with same header as input
+head -n1 "${INPUT_SAMPLES}" > "${OUTPUT_DIR}/final_samples.txt"
+cat "${OUTPUT_DIR}/selected_males.txt" "${OUTPUT_DIR}/selected_females.txt" >> "${OUTPUT_DIR}/final_samples.txt"
 
-n_selected=$(tail -n +2 "${OUTPUT_FILE}" | wc -l)
+n_selected=$(tail -n +2 "${OUTPUT_DIR}/final_samples.txt" | wc -l)
 echo "Selected ${n_selected} samples (${N_MALES} males, ${N_FEMALES} females)"
+
+
+# Copy read count files for selected samples
+log "Copying read count files for selected samples..."
+
+mkdir -p "${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}"
+    
+bash "${SCRIPT_DIR}/scripts/copy_read_count_files.sh" \
+    "${BASE_DIR}/selected_samples/gCNV/03_read_counts/final_samples.txt" \
+    "${BASE_PATH}" \
+    "${PROTOCOL}" \
+    "${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}"
+    
+log "Read count files copied to ${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}/"
