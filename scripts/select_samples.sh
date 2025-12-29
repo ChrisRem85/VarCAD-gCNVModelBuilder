@@ -10,6 +10,8 @@ N_MALES="$2"
 N_FEMALES="$3"
 OUTPUT_DIR="$4"
 
+# Ensure output directory exists
+mkdir -p "${OUTPUT_DIR}"
 
 # Read header and identify column positions
 header=$(head -n1 "${INPUT_SAMPLES}")
