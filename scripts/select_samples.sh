@@ -61,7 +61,7 @@ echo "Copying read count files for selected samples..."
 mkdir -p "${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}"
     
 bash "${SCRIPT_DIR}/scripts/copy_read_count_files.sh" \
-    "${BASE_DIR}/selected_samples/gCNV/03_read_counts/final_samples.txt" \
+    "${BASE_DIR}/selected_samples/final_samples.txt" \
     "${BASE_PATH}" \
     "${PROTOCOL}" \
     "${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}"
