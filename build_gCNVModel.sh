@@ -330,7 +330,7 @@ select_final_samples() {
         "${N_FEMALES}" \
         "${BASE_DIR}/selected_samples"
     
-    log "Step 3 completed. Selected $(wc -l < ${BASE_DIR}/selected_samples/final_samples.txt) samples for model building"
+    log "Step 3 completed."
     log "Output saved to ${BASE_DIR}/selected_samples/final_samples.txt"
 }
 
