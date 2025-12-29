@@ -56,7 +56,7 @@ echo "Selected ${n_selected} samples (${N_MALES} males, ${N_FEMALES} females)"
 
 
 # Copy read count files for selected samples
-log "Copying read count files for selected samples..."
+echo "Copying read count files for selected samples..."
 
 mkdir -p "${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}"
     
@@ -66,4 +66,4 @@ bash "${SCRIPT_DIR}/scripts/copy_read_count_files.sh" \
     "${PROTOCOL}" \
     "${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}"
     
-log "Read count files copied to ${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}/"
+echo "Read count files copied to ${BASE_DIR}/selected_samples/gCNV/03_read_counts/${PROTOCOL}/"
