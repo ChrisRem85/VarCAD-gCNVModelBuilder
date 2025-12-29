@@ -31,7 +31,7 @@ echo "Using columns: sample_id=${sample_col}, run=${run_col}"
 input_samples=0
 copied_samples=0
 
-tail -n +2 "${INPUT_FILE}" | while IFS=$'\t' read -r -a fields; do
+while IFS=$'\t' read -r -a fields; do
     sample_id="${fields[$((sample_col-1))]}"
     run="${fields[$((run_col-1))]}"
     
@@ -48,6 +48,6 @@ tail -n +2 "${INPUT_FILE}" | while IFS=$'\t' read -r -a fields; do
     else
         echo "WARNING: Read count file not found: ${tsv_file}" >&2
     fi
-done
+done < <(tail -n +2 "${INPUT_FILE}")
 
 echo "Read count files copied: ${copied_samples}/${input_samples} samples"
