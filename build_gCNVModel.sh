@@ -346,6 +346,7 @@ build_gcnv_model() {
     
     snakemake \
         --snakefile "${SCRIPT_DIR}/snakemake/gatk_gCNV.cohort.smk" \
+        --config protocol=${PROTOCOL} \
         --cores 384 \
         --printshellcmds \
         --rerun-incomplete \

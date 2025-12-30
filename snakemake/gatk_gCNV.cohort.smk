@@ -10,7 +10,7 @@ import math
 GDA_VERSION = "3.0"
 GATK_VERSION = "4.6.0.0"
 GITC_VERSION = "2.3.1-1512499786"
-PROTOCOL = "wgs.1k"
+PROTOCOL = config.get("protocol", "wgs.1k")  # Get from config, default to wgs.1k
 DB_DIR = "/mnt/storage/db"
 FASTA = "references/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
 INTERVAL_LIST = "regions/wgs_covered.hg38.bed"
@@ -27,6 +27,8 @@ INTERVAL_LIST_PATH = DB_DIR + "/" + INTERVAL_LIST
 #Get current working directory
 CWD = os.getcwd()
 
+#Get script directory (parent of snakemake directory)
+SCRIPT_DIR = os.path.dirname(workflow.basedir)
 
 #Chromosomes
 CHROMS = ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22", "chrX", "chrY"]
@@ -105,7 +107,7 @@ rule test:
 # ************************************************************************************************		
 
 rule filter_intervals:
-    input:   tsv=sorted(expand("{{cwd}}/gCNV/03_read_counts/{{protocol}}/{dataset}.hg38.tsv", dataset=DATASETS)), preprocessed_interval_list="{cwd}/gCNV/01_preprocessed_intervals/{protocol}/hg38.preprocessed.interval_list", annotated_interval_list="{cwd}/gCNV/02_annotated_intervals/{protocol}/hg38.annotated.interval_list"
+    input:   tsv=sorted(expand("{{cwd}}/gCNV/03_read_counts/{{protocol}}/{dataset}.hg38.tsv", dataset=DATASETS)), preprocessed_interval_list=SCRIPT_DIR + "/assets/{protocol}/hg38.preprocessed.interval_list", annotated_interval_list=SCRIPT_DIR + "/assets/{protocol}/hg38.annotated.interval_list"
     output:  interval_list="{cwd}/gCNV/04_filtered_intervals/{protocol}/cohort.hg38.filtered.interval_list"
     params:  input=sorted(expand("-I {{cwd}}/gCNV/03_read_counts/{{protocol}}/{dataset}.hg38.tsv", dataset=DATASETS))
     message: "executing {rule} with output {output} and input {input}"
