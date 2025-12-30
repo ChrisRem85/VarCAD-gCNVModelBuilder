@@ -78,11 +78,11 @@ OUTPUT.append(CWD + "/gCNV/04_filtered_intervals/" + PROTOCOL + "/cohort.hg38.fi
 OUTPUT.append(CWD + "/gCNV/05_contig_ploidy/" + PROTOCOL + "/cohort.hg38.ploidy-model/ploidy_config.json")
 OUTPUT = OUTPUT + expand(CWD + "/gCNV/05_contig_ploidy/" + PROTOCOL + "/cohort.hg38.ploidy-calls/SAMPLE_{sample_index}/contig_ploidy.tsv", sample_index=SAMPLE_INDICES)
 
-OUTPUT = OUTPUT + expand(CWD + "/gCNV/06_scattered_intervals/" + PROTOCOL + "/cohort.hg38.filtered.{chrom}.interval_list", chrom=CHROMS)
+#OUTPUT = OUTPUT + expand(CWD + "/gCNV/06_scattered_intervals/" + PROTOCOL + "/cohort.hg38.filtered.{chrom}.interval_list", chrom=CHROMS)
 
-OUTPUT = OUTPUT + expand(CWD + "/gCNV/07_raw_cnv/" + PROTOCOL + "/cohort.hg38.{chrom}.cnv-tracking/main_elbo_history.tsv", chrom=CHROMS)
-OUTPUT = OUTPUT + expand(CWD + "/gCNV/07_raw_cnv/" + PROTOCOL + "/cohort.hg38.{chrom}.cnv-model/calling_config.json", chrom=CHROMS)
-OUTPUT = OUTPUT + expand(CWD + "/gCNV/07_raw_cnv/" + PROTOCOL + "/cohort.hg38.{chrom}.cnv-calls/calling_config.json", chrom=CHROMS)
+#OUTPUT = OUTPUT + expand(CWD + "/gCNV/07_raw_cnv/" + PROTOCOL + "/cohort.hg38.{chrom}.cnv-tracking/main_elbo_history.tsv", chrom=CHROMS)
+#OUTPUT = OUTPUT + expand(CWD + "/gCNV/07_raw_cnv/" + PROTOCOL + "/cohort.hg38.{chrom}.cnv-model/calling_config.json", chrom=CHROMS)
+#OUTPUT = OUTPUT + expand(CWD + "/gCNV/07_raw_cnv/" + PROTOCOL + "/cohort.hg38.{chrom}.cnv-calls/calling_config.json", chrom=CHROMS)
 
 # OUTPUT = OUTPUT + expand(CWD + "/gCNV/08_postprocessed_cnv/" + PROTOCOL + "/cohort.SAMPLE_{sample_index}/denoised_copy_ratios.tsv", sample_index=SAMPLE_INDICES)
 # OUTPUT = OUTPUT + expand(CWD + "/gCNV/08_postprocessed_cnv/" + PROTOCOL + "/cohort.SAMPLE_{sample_index}/genotyped_intervals.vcf.gz", sample_index=SAMPLE_INDICES)
