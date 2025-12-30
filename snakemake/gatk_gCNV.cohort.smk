@@ -148,7 +148,7 @@ rule determine_germline_contig_ploidy:
 			mkdir -p {params.ploidy_model_dir}; \
 			mkdir -p {params.ploidy_calls_dir}; \
 			srun -p all -c {threads} --mem={resources.mem_gb}GB \
-			docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c " \
+			docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
 				printf 'Container ID:\\t'; hostname; \
 				printf 'Start time:\\t'; date; \
 				umask 0027; \
