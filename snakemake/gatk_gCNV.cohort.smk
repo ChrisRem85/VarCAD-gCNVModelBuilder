@@ -133,7 +133,7 @@ rule filter_intervals:
 
 
 rule determine_germline_contig_ploidy:
-    input:   tsv=sorted(expand("{{cwd}}/gCNV/03_read_counts/{{protocol}}/{dataset}.hg38.tsv", dataset=DATASETS)), interval_list="{cwd}/gCNV/04_filtered_intervals/{protocol}/cohort.hg38.filtered.interval_list", par_bed_gz="/mnt/storage/db/GATK_resources/hg38/par.bed.gz", priors="/mnt/storage/db/GATK_resources/hg38/wholegenome.contig_ploidy_priors.tsv"
+    input:   tsv=sorted(expand("{{cwd}}/gCNV/03_read_counts/{{protocol}}/{dataset}.hg38.tsv", dataset=DATASETS)), interval_list="{cwd}/gCNV/04_filtered_intervals/{protocol}/cohort.hg38.filtered.interval_list", par_bed_gz="/mnt/storage/db/GATK_resources/hg38/par.bed.gz", priors=SCRIPT_DIR + "/assets/contig_ploidy_prior.tsv"
     output:  ploidy_model="{cwd}/gCNV/05_contig_ploidy/{protocol}/cohort.hg38.ploidy-model/ploidy_config.json", ploidy_calls=sorted(expand("{{cwd}}/gCNV/05_contig_ploidy/{{protocol}}/cohort.hg38.ploidy-calls/SAMPLE_{sample_index}/contig_ploidy.tsv", sample_index=SAMPLE_INDICES))
     params:  input=sorted(expand("-I {{cwd}}/gCNV/03_read_counts/{{protocol}}/{dataset}.hg38.tsv", dataset=DATASETS)), ploidy_model_dir="{cwd}/gCNV/05_contig_ploidy/{protocol}/cohort.hg38.ploidy-model", ploidy_calls_dir="{cwd}/gCNV/05_contig_ploidy/{protocol}/cohort.hg38.ploidy-calls"
     message: "executing {rule} with output {output} and input {input}"
