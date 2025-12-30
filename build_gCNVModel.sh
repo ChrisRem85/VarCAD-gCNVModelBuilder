@@ -338,14 +338,23 @@ select_final_samples() {
 build_gcnv_model() {
     log "STEP 4: Building gCNV model..."
     
-    bash "${SCRIPT_DIR}/scripts/build_model.sh" \
-        "${FINAL_SAMPLES_DIR}/final_samples.txt" \
-        "${GCNV_DIR}" \
-        "${BASE_DIR}/preprocessed.interval_list" \
-        "${REFERENCE_FASTA}" \
-        "${MODEL_DIR}"
+    local snakemake_workdir="${BASE_DIR}/selected_samples"
     
-    log "Step 4 completed. Model saved to ${MODEL_DIR}"
+    # Run snakemake workflow from selected_samples directory (TSV files already present)
+    log "Running Snakemake workflow for model building..."
+    cd "${snakemake_workdir}"
+    
+    snakemake \
+        --snakefile "${SCRIPT_DIR}/snakemake/gatk_gCNV.cohort.smk" \
+        --cores 384 \
+        --printshellcmds \
+        --rerun-incomplete \
+        --latency-wait 60 \
+        2>&1 | tee -a "${snakemake_workdir}/snakemake.log"
+    
+    cd "${SCRIPT_DIR}"
+    
+    log "Step 4 completed. Model artifacts in ${snakemake_workdir}"
 }
 
 # Main pipeline
@@ -374,10 +383,10 @@ main() {
     #filter_by_Somalier_Relatedness
     
     # Step 3
-    select_final_samples
+    #select_final_samples
     
     # Step 4
-    #build_gcnv_model
+    build_gcnv_model
     
     log "=========================================="
     log "Pipeline completed successfully!"
