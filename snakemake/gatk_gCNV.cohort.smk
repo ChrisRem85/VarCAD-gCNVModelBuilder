@@ -35,7 +35,7 @@ CHROMS = ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9"
 
 
 # Create wildcards
-DATASETS, = glob_wildcards(CWD + "/selected_samples/gCNV/03_read_counts/" + PROTOCOL + "/{dataset, [A-Za-z0-9\-\_]+}.hg38.tsv")
+DATASETS, = glob_wildcards(CWD + "/gCNV/03_read_counts/" + PROTOCOL + "/{dataset, [A-Za-z0-9\-\_]+}.hg38.tsv")
 
 
 #Set SAMPLE_INDICES
