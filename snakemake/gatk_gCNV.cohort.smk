@@ -117,7 +117,7 @@ rule filter_intervals:
     shell:   "umask 0027; \
 				mkdir -p $(dirname {output.interval_list}); \
                 srun -p all -c {threads} --mem={resources.mem_gb}GB \
-				docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
+				docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c " \
 					printf 'Container ID:\\t'; hostname; \
 					printf 'Start time:\\t'; date; \
 					umask 0027; \
@@ -148,7 +148,7 @@ rule determine_germline_contig_ploidy:
 			mkdir -p {params.ploidy_model_dir}; \
 			mkdir -p {params.ploidy_calls_dir}; \
 			srun -p all -c {threads} --mem={resources.mem_gb}GB \
-			docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
+			docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c " \
 				printf 'Container ID:\\t'; hostname; \
 				printf 'Start time:\\t'; date; \
 				umask 0027; \
@@ -178,7 +178,7 @@ rule scatter_filtered_intervals:
     shell:  "umask 0027; \
 			mkdir -p $(dirname {output.interval_list}); \
 			srun -p all -c {threads} --mem={resources.mem_gb}GB \
-			docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
+			docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c " \
 				printf 'Container ID:\\t'; hostname; \
 				printf 'Start time:\\t'; date; \
 				umask 0027; \
@@ -211,7 +211,7 @@ rule run_GermlineCNVCaller:
 			mkdir -p {params.cnv_model_dir}; \
 			mkdir -p {params.cnv_calls_dir}; \
 			srun -p all -c {threads} --mem={resources.mem_gb}GB \
-			docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
+			docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c " \
 				printf 'Container ID:\\t'; hostname; \
 				printf 'Start time:\\t'; date; \
 				umask 0027; \
@@ -265,7 +265,7 @@ rule postprocess_GermlineCNVCalls:
     shell:   "umask 0027; \
 		mkdir -p {params.postprocessed_cnv_dir}; \
                 srun -p all -c {threads} --mem={resources.mem_gb}GB \
-		docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
+		docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c " \
 			printf 'Container ID:\\t'; hostname; \
                         printf 'Start time:\\t'; date; \
                         umask 0027; \
@@ -308,7 +308,7 @@ rule finalize_denoised_copy_ratios:
     shell:   "umask 0027; \
                 mkdir -p $(dirname {output.denoised_copy_ratios_bedgraph}); \
                 srun -p all -c {threads} --mem={resources.mem_gb}GB \
-                docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c \" \
+                docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c " \
                         printf 'Container ID:\\t'; hostname; \
                         printf 'Start time:\\t'; date; \
                         umask 0027; \
@@ -337,7 +337,7 @@ rule finalize_genotyped_intervals:
     shell:   "umask 0027; \
 		mkdir -p $(dirname {output.genotyped_intervals_vcf_gz}); \
 		srun -p all -c {threads} --mem={resources.mem_gb}GB \
-		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c \" \
+		docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c " \
 			printf 'Container ID:\\t'; hostname; \
 			printf 'Start time:\\t'; date; \
 			umask 0027; \
@@ -365,7 +365,7 @@ rule finalize_genotyped_segments:
     shell:   "umask 0027; \
                 mkdir -p $(dirname {output.genotyped_segments_vcf_gz}); \
                 srun -p all -c {threads} --mem={resources.mem_gb}GB \
-                docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c \" \
+                docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c " \
                         printf 'Container ID:\\t'; hostname; \
                         printf 'Start time:\\t'; date; \
                         umask 0027; \
