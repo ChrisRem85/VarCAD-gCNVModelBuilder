@@ -197,10 +197,9 @@ rule run_GermlineCNVCaller:
     output:  cnv_tracking="{cwd}/gCNV/07_raw_cnv/{protocol}/cohort.hg38.{chrom}.cnv-tracking/main_elbo_history.tsv", cnv_model="{cwd}/gCNV/07_raw_cnv/{protocol}/cohort.hg38.{chrom}.cnv-model/calling_config.json", cnv_calls="{cwd}/gCNV/07_raw_cnv/{protocol}/cohort.hg38.{chrom}.cnv-calls/calling_config.json"
     params:  input=sorted(expand("-I {{cwd}}/gCNV/03_read_counts/{{protocol}}/{dataset}.hg38.tsv", dataset=DATASETS)), ploidy_calls_dir="{cwd}/gCNV/05_contig_ploidy/{protocol}/cohort.hg38.ploidy-calls", cnv_tracking_dir="{cwd}/gCNV/07_raw_cnv/{protocol}/cohort.hg38.{chrom}.cnv-tracking", cnv_model_dir="{cwd}/gCNV/07_raw_cnv/{protocol}/cohort.hg38.{chrom}.cnv-model", cnv_calls_dir="{cwd}/gCNV/07_raw_cnv/{protocol}/cohort.hg38.{chrom}.cnv-calls"
     message: "executing {rule} with output {output} and input {input}"
-    threads: lambda wildcards, attempt: 64 * attempt
-    retries: 1
+    threads: lambda wildcards: 128 if wildcards.chrom in ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX"] else 64
     resources:
-	    mem_gb=lambda wildcards, attempt: 160 * attempt
+	    mem_gb=lambda wildcards: 320 if wildcards.chrom in ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX"] else 16
     shell:  "umask 0027; \
 			mkdir -p {params.cnv_tracking_dir}; \
 			mkdir -p {params.cnv_model_dir}; \
