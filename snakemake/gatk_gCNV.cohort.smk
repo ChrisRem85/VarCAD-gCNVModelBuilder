@@ -204,9 +204,9 @@ rule run_GermlineCNVCaller:
 			mkdir -p {params.cnv_tracking_dir}; \
 			mkdir -p {params.cnv_model_dir}; \
 			mkdir -p {params.cnv_calls_dir}; \
-			rm -r {params.cnv_tracking_dir}; \
-			rm -r {params.cnv_model_dir}; \
-			rm -r {params.cnv_calls_dir}; \
+			rm -rf {params.cnv_tracking_dir}; \
+			rm -rf {params.cnv_model_dir}; \
+			rm -rf {params.cnv_calls_dir}; \
 			mkdir -p {params.cnv_tracking_dir}; \
 			mkdir -p {params.cnv_model_dir}; \
 			mkdir -p {params.cnv_calls_dir}; \
