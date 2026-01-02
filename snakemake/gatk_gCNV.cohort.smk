@@ -199,7 +199,7 @@ rule run_GermlineCNVCaller:
     message: "executing {rule} with output {output} and input {input}"
     threads: 64
     resources:
-	    mem_gb=lambda wildcards: 320 if wildcards.chrom in ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX"] else 16
+	    mem_gb=lambda wildcards: 320 if wildcards.chrom in ["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX"] else 160
     shell:  "umask 0027; \
 			mkdir -p {params.cnv_tracking_dir}; \
 			mkdir -p {params.cnv_model_dir}; \
