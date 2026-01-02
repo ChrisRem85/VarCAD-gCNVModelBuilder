@@ -344,7 +344,7 @@ build_gcnv_model() {
     log "Running Snakemake workflow for model building..."
     cd "${snakemake_workdir}"
     
-    snakemake \
+    /mnt/storage/groups/genetics/VarCAD-dev/external/Miniforge3/condabin/mamba run --live-stream -n snakemake snakemake \
         --snakefile "${SCRIPT_DIR}/snakemake/gatk_gCNV.cohort.smk" \
         --config protocol=${PROTOCOL} \
         --cores 384 \
