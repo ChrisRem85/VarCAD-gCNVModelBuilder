@@ -351,6 +351,7 @@ build_gcnv_model() {
         --printshellcmds \
         --rerun-incomplete \
         --latency-wait 60 \
+        --rerun-triggers mtime \
         2>&1 | tee -a "${snakemake_workdir}/snakemake.log"
     
     cd "${SCRIPT_DIR}"
