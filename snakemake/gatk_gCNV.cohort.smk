@@ -90,7 +90,7 @@ OUTPUT = OUTPUT + expand(CWD + "/gCNV/08_postprocessed_cnv/" + PROTOCOL + "/coho
 
 # OUTPUT = OUTPUT + expand(CWD + "/gCNV/final/" + PROTOCOL + "/{dataset}.hg38.gCNV." + PROTOCOL + ".cohort.denoised_copy_ratios.bedGraph", dataset=DATASETS)
 # OUTPUT = OUTPUT + expand(CWD + "/gCNV/final/" + PROTOCOL + "/{dataset}.hg38.gCNV." + PROTOCOL + ".cohort.genotyped_intervals.vcf.gz", dataset=DATASETS)
-# OUTPUT = OUTPUT + expand(CWD + "/gCNV/final/" + PROTOCOL + "/{dataset}.hg38.gCNV." + PROTOCOL + ".cohort.genotyped_segments.vcf.gz", dataset=DATASETS)
+OUTPUT = OUTPUT + expand(CWD + "/gCNV/final/" + PROTOCOL + "/{dataset}.hg38.gCNV." + PROTOCOL + ".cohort.genotyped_segments.vcf.gz", dataset=DATASETS)
 
 
 # ************************************************************************************************
@@ -263,32 +263,32 @@ rule postprocess_GermlineCNVCalls:
     resources:
 	    mem_gb=32
     shell:   "umask 0027; \
-		mkdir -p {params.postprocessed_cnv_dir}; \
-        srun -p all -c {threads} --mem={resources.mem_gb}GB \
-		docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
-			printf 'Container ID:\\t'; hostname; \
-			printf 'Start time:\\t'; date; \
-			umask 0027; \
-			export MKL_NUM_THREADS={threads}; \
-			export OMP_NUM_THREADS={threads}; \
-			gatk PostprocessGermlineCNVCalls \
-				{params.model_shard_path} \
-				{params.calls_shard_path} \
-				--contig-ploidy-calls {params.ploidy_calls_dir} \
-				--allosomal-contig chrX \
-				--allosomal-contig chrY \
-				--sample-index {wildcards.sample_index} \
-				--output-denoised-copy-ratios {output.denoised_copy_ratios_tsv} \
-				--output-genotyped-intervals {output.genotyped_intervals_vcf_gz} \
-				--output-genotyped-segments {output.genotyped_segments_vcf_gz} \
-				--reference {input.fasta} \
-				--verbosity DEBUG; \
-			[[ \$(cat {output.denoised_copy_ratios_tsv} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
-			[[ \$(bcftools view -H {output.genotyped_intervals_vcf_gz} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
-			[[ \$(bcftools view -H {output.genotyped_segments_vcf_gz} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
-			chown -R $UID:1002 {params.postprocessed_cnv_dir}; \
-			printf 'End time:\\t'; date; \" \
-		&> {params.postprocessed_cnv_dir}.log;"
+			mkdir -p {params.postprocessed_cnv_dir}; \
+			srun -p all -c {threads} --mem={resources.mem_gb}GB \
+			docker run --cpus {threads} -m {resources.mem_gb}g -u root:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro broadinstitute/gatk:{GATK_VERSION} /bin/bash -c \" \
+				printf 'Container ID:\\t'; hostname; \
+				printf 'Start time:\\t'; date; \
+				umask 0027; \
+				export MKL_NUM_THREADS={threads}; \
+				export OMP_NUM_THREADS={threads}; \
+				gatk PostprocessGermlineCNVCalls \
+					{params.model_shard_path} \
+					{params.calls_shard_path} \
+					--contig-ploidy-calls {params.ploidy_calls_dir} \
+					--allosomal-contig chrX \
+					--allosomal-contig chrY \
+					--sample-index {wildcards.sample_index} \
+					--output-denoised-copy-ratios {output.denoised_copy_ratios_tsv} \
+					--output-genotyped-intervals {output.genotyped_intervals_vcf_gz} \
+					--output-genotyped-segments {output.genotyped_segments_vcf_gz} \
+					--reference {input.fasta} \
+					--verbosity DEBUG; \
+				[[ \$(cat {output.denoised_copy_ratios_tsv} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
+				[[ \$(bcftools view -H {output.genotyped_intervals_vcf_gz} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
+				[[ \$(bcftools view -H {output.genotyped_segments_vcf_gz} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
+				chown -R $UID:1002 {params.postprocessed_cnv_dir}; \
+				printf 'End time:\\t'; date; \" \
+			&> {params.postprocessed_cnv_dir}.log;"
 
 
 # def get_denoised_copy_ratios(wildcards):
@@ -348,41 +348,41 @@ rule postprocess_GermlineCNVCalls:
 # 		&> {output.genotyped_intervals_vcf_gz}.log;"
 
 
-# def get_genotyped_segments(wildcards):
-# 	return "{cwd}/gCNV/08_postprocessed_cnv/{protocol}/cohort.SAMPLE_" + SAMPLE_DATASETS_INDICES[wildcards.dataset] + "/genotyped_segments.vcf.gz"
+def get_genotyped_segments(wildcards):
+	return "{cwd}/gCNV/08_postprocessed_cnv/{protocol}/cohort.SAMPLE_" + SAMPLE_DATASETS_INDICES[wildcards.dataset] + "/genotyped_segments.vcf.gz"
 
 
-# rule finalize_genotyped_segments:
-#     input:   genotyped_segments_vcf_gz=get_genotyped_segments
-#     output:  genotyped_segments_vcf_gz="{cwd}/gCNV/final/{protocol}/{dataset}.hg38.gCNV.{protocol}.cohort.genotyped_segments.vcf.gz"
-#     params:
-#     wildcard_constraints:
-#             sample_index="\d+"
-#     message: "executing {rule} with output {output} and input {input}"
-#     threads: 2
-#     resources:
-#             mem_gb=4
-#     shell:   "umask 0027; \
-#                 mkdir -p $(dirname {output.genotyped_segments_vcf_gz}); \
-#                 srun -p all -c {threads} --mem={resources.mem_gb}GB \
-#                 docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c " \
-#                         printf 'Container ID:\\t'; hostname; \
-#                         printf 'Start time:\\t'; date; \
-#                         umask 0027; \
-# 			bcftools view \
-# 				--threads {threads} \
-# 				-i 'GT!=\\\"ref\\\" && ALT!=\\\".\\\"' \
-# 				{input.genotyped_segments_vcf_gz} | \
-# 			sed 's&\\./\\.:&0/1:&g' | \
-# 			sed 's&\\.:&1:&g' | \
-# 			bcftools view \
-# 				--threads {threads} \
-# 				-O z \
-# 				-o {output.genotyped_segments_vcf_gz}; \
-# 			[[ \$(bcftools view -H {output.genotyped_segments_vcf_gz} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
-#                         tabix {output.genotyped_segments_vcf_gz}; \
-#                         printf 'End time:\\t'; date; \" \
-#                 &> {output.genotyped_segments_vcf_gz}.log;"
+rule finalize_genotyped_segments:
+    input:   genotyped_segments_vcf_gz=get_genotyped_segments
+    output:  genotyped_segments_vcf_gz="{cwd}/gCNV/final/{protocol}/{dataset}.hg38.gCNV.{protocol}.cohort.genotyped_segments.vcf.gz"
+    params:
+    wildcard_constraints:
+            sample_index="\d+"
+    message: "executing {rule} with output {output} and input {input}"
+    threads: 2
+    resources:
+            mem_gb=4
+    shell:   "umask 0027; \
+			mkdir -p $(dirname {output.genotyped_segments_vcf_gz}); \
+			srun -p all -c {threads} --mem={resources.mem_gb}GB \
+			docker run --cpus {threads} -m {resources.mem_gb}g -u $UID:1002 --rm -v {CWD}:{CWD} -v {SCRIPT_DIR}:{SCRIPT_DIR}:ro -v {DB_DIR}:{DB_DIR}:ro storage-node:5000/own/genetic_data_analysis:{GDA_VERSION} /bin/bash -c \" \
+				printf 'Container ID:\\t'; hostname; \
+				printf 'Start time:\\t'; date; \
+				umask 0027; \
+				bcftools view \
+					--threads {threads} \
+					-i 'GT!=\\\"ref\\\" && ALT!=\\\".\\\"' \
+					{input.genotyped_segments_vcf_gz} | \
+				sed 's&\\./\\.:&0/1:&g' | \
+				sed 's&\\.:&1:&g' | \
+				bcftools view \
+					--threads {threads} \
+					-O z \
+					-o {output.genotyped_segments_vcf_gz}; \
+				[[ \$(bcftools view -H {output.genotyped_segments_vcf_gz} | wc -l) -lt 1 ]] && exit 101 || echo 'File size: OK'; \
+				tabix {output.genotyped_segments_vcf_gz}; \
+				printf 'End time:\\t'; date; \" \
+			&> {output.genotyped_segments_vcf_gz}.log;"
 
 
 # ************************************************************************************************
