@@ -77,6 +77,8 @@ Detailed documentation for each component:
 - **[Relatedness Filtering](docs/filter_related.md)** - Somalier-based relationship removal
 - **[Sample Selection](docs/select_samples.md)** - Random balanced cohort selection  
 - **[Model Building](docs/build_model.md)** - GATK gCNV model construction
+- **[PAR pseudo-contigs](docs/par_pseudo_contigs.md)** - PAR1/PAR2 as in-silico pseudo-autosomes (SHOX) via `par_mode`
+- **[Batch clustering & router](docs/clustering_router_plan.md)** - `gcnvr explore`: PCA/GMM batch discovery with HTML report (phase 1)
 
 ## Key Features
 

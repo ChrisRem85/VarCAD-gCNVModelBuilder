@@ -11,3 +11,8 @@
 # Large generated interval files
 assets/*/hg38.annotated.interval_list
 assets/*/hg38.preprocessed.interval_list
+
+# Python
+__pycache__/
+*.egg-info/
+.pytest_cache/
