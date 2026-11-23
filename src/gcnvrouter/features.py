@@ -24,7 +24,8 @@ PAR = {"chrX": [(10001, 2781479), (155701383, 156030895)],
 
 
 def autosomal_mask(intervals: pd.DataFrame) -> np.ndarray:
-    return intervals["CONTIG"].isin(AUTOSOMES).to_numpy()
+    # np.array(...) copies: with pandas copy-on-write (default in pandas 3) .to_numpy() is read-only
+    return np.array(intervals["CONTIG"].isin(AUTOSOMES), dtype=bool)
 
 
 def _outside_par(intervals: pd.DataFrame) -> np.ndarray:
